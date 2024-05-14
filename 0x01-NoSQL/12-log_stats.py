@@ -1,30 +1,21 @@
 #!/usr/bin/env python3
-'''Task 12's module.
-'''
+""" Log stats """
 from pymongo import MongoClient
 
-
-def print_nginx_request_logs(nginx_collection):
-    '''Prints stats about Nginx request logs.
-    '''
-    print('{} logs'.format(nginx_collection.count_documents({})))
-    print('Methods:')
-    methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-    for method in methods:
-        req_count = len(list(nginx_collection.find({'method': method})))
-        print('\tmethod {}: {}'.format(method, req_count))
-    status_checks_count = len(list(
-        nginx_collection.find({'method': 'GET', 'path': '/status'})
-    ))
-    print('{} status check'.format(status_checks_count))
-
-
-def run():
-    '''Provides some stats about Nginx logs stored in MongoDB.
-    '''
+if __name__ == "__main__":
     client = MongoClient('mongodb://127.0.0.1:27017')
-    print_nginx_request_logs(client.logs.nginx)
-
-
-if __name__ == '__main__':
-    run()
+    nginx = client.logs.nginx
+    total_count = nginx.count_documents({})
+    get_count = nginx.count_documents({"method": "GET"})
+    post_count = nginx.count_documents({"method": "POST"})
+    put_count = nginx.count_documents({"method": "PUT"})
+    patch_count = nginx.count_documents({"method": "PATCH"})
+    delete_count = nginx.count_documents({"method": "DELETE"})
+    status_get_count = nginx.count_documents({"method": "GET", "path": "/status"})
+    all_methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    all_method_counts = [get_count, post_count, put_count, patch_count, delete_count]
+    print("{} logs".format(total_count))
+    print("Methods:")
+    for i in range(len(all_methods)):
+        print("\tmethod {0}: {1}".format(all_methods[i], all_method_counts[i]))
+    print("{} status check".format(status_get_count))
